@@ -1,0 +1,37 @@
+.DS_Store
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Editor and local environments
+.vscode/
+.idea/
+.env
+.env.*
+.venv/
+venv/
+env/
+
+# Local runtime caches
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Generated analysis artifacts stay outside Git unless explicitly curated.
+/AGENTS.md
+/docs/
+/studies/
+/tests/
+/outputs/
+**/outputs/
+studies/*/outputs/
+studies/*/resources/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
