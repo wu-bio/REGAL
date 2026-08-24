@@ -84,4 +84,4 @@ If you use REGAL, please cite:
 
 ## License
 
-No software license has been specified yet. Please contact the authors before redistributing or incorporating the code into another project.
+REGAL is distributed under the [BSD 3-Clause License](LICENSE).
