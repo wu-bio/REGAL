@@ -30,7 +30,7 @@ def resolve_device(device: str) -> str:
     return requested
 
 
-class STAGATEEncoder(nn.Module):
+class SpatialGraphAttentionAutoencoder(nn.Module):
     def __init__(self, input_dim: int, hidden_dims: tuple[int, ...]) -> None:
         super().__init__()
         dims = (int(input_dim),) + tuple(int(dim) for dim in hidden_dims)
@@ -109,7 +109,7 @@ def segment_softmax(values: torch.Tensor, segment_ids: torch.Tensor, n_segments:
     return exp_values / sum_per_segment[segment_ids].clamp_min(1e-12)
 
 
-def build_stagate_edge_index(
+def build_spatial_edge_index(
     *,
     spatial: np.ndarray,
     mode: str,
@@ -118,7 +118,7 @@ def build_stagate_edge_index(
 ) -> np.ndarray:
     n_spots = int(spatial.shape[0])
     if n_spots < 2:
-        raise ValueError("At least two spots are required to build a STAGATE graph.")
+        raise ValueError("At least two spots are required to build a spatial graph.")
     edges: set[tuple[int, int]] = {(i, i) for i in range(n_spots)}
     if mode == "radius":
         nn = NearestNeighbors(radius=float(radius_cutoff)).fit(spatial)
@@ -136,11 +136,11 @@ def build_stagate_edge_index(
             for j in indices[i, 1:]:
                 edges.add((int(j), i))
     else:
-        raise ValueError(f"Unsupported STAGATE graph mode: {mode!r}. Use 'radius' or 'knn'.")
+        raise ValueError(f"Unsupported spatial graph mode: {mode!r}. Use 'radius' or 'knn'.")
     return np.asarray(sorted(edges), dtype=np.int64).T
 
 
-def train_stagate_latent(
+def train_spatial_graph_latent(
     *,
     features: np.ndarray,
     spatial: np.ndarray,
@@ -150,7 +150,7 @@ def train_stagate_latent(
     weight_decay: float,
     gradient_clipping: float,
     graph_mode: str,
-    stagate_graph_k: int,
+    graph_k: int,
     radius_cutoff: float,
     random_seed: int,
     device: str,
@@ -158,29 +158,29 @@ def train_stagate_latent(
     progress_interval: int,
 ) -> tuple[np.ndarray, list[float], dict]:
     if features.ndim != 2:
-        raise ValueError(f"STAGATE features must be 2D, got shape={features.shape}.")
+        raise ValueError(f"Spatial graph encoder features must be 2D, got shape={features.shape}.")
     set_torch_seed(random_seed)
     resolved_device = resolve_device(device)
-    edge_index_np = build_stagate_edge_index(
+    edge_index_np = build_spatial_edge_index(
         spatial=spatial,
         mode=graph_mode,
-        k=stagate_graph_k,
+        k=graph_k,
         radius_cutoff=radius_cutoff,
     )
     if verbose:
         print(
-            "[RSS STAGATE encoder] "
+            "[RSS spatial graph attention encoder] "
             f"input_shape={tuple(features.shape)} "
             f"hidden_dims={tuple(hidden_dims)} "
             f"graph_mode={graph_mode} "
             f"radius_cutoff={float(radius_cutoff):.3f} "
-            f"stagate_graph_k={int(stagate_graph_k)} "
+            f"graph_k={int(graph_k)} "
             f"n_edges={int(edge_index_np.shape[1])} "
             f"device={resolved_device} "
             f"epochs={int(epochs)}",
             flush=True,
         )
-    model = STAGATEEncoder(features.shape[1], hidden_dims).to(resolved_device)
+    model = SpatialGraphAttentionAutoencoder(features.shape[1], hidden_dims).to(resolved_device)
     x = torch.as_tensor(features, dtype=torch.float32, device=resolved_device)
     edge_index = torch.as_tensor(edge_index_np, dtype=torch.long, device=resolved_device)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(lr), weight_decay=float(weight_decay))
@@ -199,7 +199,8 @@ def train_stagate_latent(
         losses.append(loss_value)
         if verbose and (epoch == 0 or (epoch + 1) % interval == 0 or epoch + 1 == total_epochs):
             print(
-                f"[RSS STAGATE encoder] epoch {epoch + 1}/{total_epochs} loss={loss_value:.6f}",
+                f"[RSS spatial graph attention encoder] epoch {epoch + 1}/{total_epochs} "
+                f"loss={loss_value:.6f}",
                 flush=True,
             )
     model.eval()
@@ -208,7 +209,7 @@ def train_stagate_latent(
     meta = {
         "device": resolved_device,
         "graph_mode": str(graph_mode),
-        "stagate_graph_k": int(stagate_graph_k),
+        "graph_k": int(graph_k),
         "radius_cutoff": float(radius_cutoff),
         "n_edges": int(edge_index_np.shape[1]),
         "final_loss": float(losses[-1]) if losses else None,

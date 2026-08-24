@@ -32,10 +32,10 @@ pipeline_config.preprocess.data_layer = dataset.data_layer
 pipeline_config.preprocess.spot_id_field = dataset.spot_id_field
 pipeline_config.preprocess.hvg = 3000
 
-# STAGATE latent graph parameters.
+# Spatial graph attention encoder parameters.
 pipeline_config.latent.epochs = 500
 pipeline_config.latent.spatial_graph_mode = "knn"
-pipeline_config.latent.stagate_graph_k = 6
+pipeline_config.latent.graph_k = 6
 
 # MicroDomain parameters.
 pipeline_config.neighbors.normal_k = 12

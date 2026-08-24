@@ -86,13 +86,13 @@ def compute_latent(
     random_seed: int,
 ) -> tuple[np.ndarray, dict]:
     try:
-        from .stagate_encoder import train_stagate_latent
+        from .spatial_graph_encoder import train_spatial_graph_latent
     except ImportError:
-        from RSS.stagate_encoder import train_stagate_latent
+        from RSS.spatial_graph_encoder import train_spatial_graph_latent
 
     if "spatial" not in adata.obsm:
-        raise ValueError("Missing adata.obsm['spatial']; required for STAGATE-style encoder.")
-    latent, losses, train_meta = train_stagate_latent(
+        raise ValueError("Missing adata.obsm['spatial']; required for spatial graph encoding.")
+    latent, losses, train_meta = train_spatial_graph_latent(
         features=latent_input,
         spatial=np.asarray(adata.obsm["spatial"])[:, :2],
         hidden_dims=tuple(int(dim) for dim in latent_cfg.hidden_dims),
@@ -101,7 +101,7 @@ def compute_latent(
         weight_decay=latent_cfg.weight_decay,
         gradient_clipping=latent_cfg.gradient_clipping,
         graph_mode=latent_cfg.spatial_graph_mode,
-        stagate_graph_k=latent_cfg.stagate_graph_k,
+        graph_k=latent_cfg.graph_k,
         radius_cutoff=latent_cfg.radius_cutoff,
         random_seed=random_seed,
         device=latent_cfg.device,
@@ -109,7 +109,7 @@ def compute_latent(
         progress_interval=latent_cfg.progress_interval,
     )
     return latent, {
-        "method": "stagate",
+        "method": "spatial_graph_attention_autoencoder",
         "epochs": int(latent_cfg.epochs),
         "hidden_dims": list(map(int, latent_cfg.hidden_dims)),
         "training": {

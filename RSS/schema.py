@@ -25,7 +25,7 @@ class LatentConfig:
     weight_decay: float = 1e-4
     gradient_clipping: float = 5.0
     spatial_graph_mode: Literal["radius", "knn"] = "knn"
-    stagate_graph_k: int = 6
+    graph_k: int = 6
     radius_cutoff: float = 150.0
     device: Literal["auto", "cpu", "cuda", "mps"] = "auto"
     verbose: bool = True
