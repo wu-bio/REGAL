@@ -62,6 +62,8 @@ python RSMD/calculate_rsmd.py
 
 The current RSS and RSMD command-line entry points use the dataset selected in their respective scripts. RSP accepts dataset and sample arguments directly. Pipeline classes in each module provide programmatic configuration for other datasets and parameter settings.
 
+RSP's `scoring.activation_active_fallback_to_base` defaults to `False`: if the strict activation threshold leaves no sufficiently large connected component, the candidate is evaluated with that empty active mask. Set it to `True`, or pass `--activation-active-fallback-to-base` to the RSP entry point, to retry with the base threshold in that case. The same setting controls candidate screening and exported active labels, and is saved in the output manifest.
+
 By default, the stages write reusable artifacts under the corresponding sample directory:
 
 ```text

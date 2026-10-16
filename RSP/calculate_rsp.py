@@ -52,6 +52,11 @@ def parse_args() -> argparse.Namespace:
         help="Optional hard-filter threshold for local RSS support score.",
     )
     parser.add_argument(
+        "--activation-active-fallback-to-base",
+        action="store_true",
+        help="Enable base-threshold fallback when strict activation filtering leaves no active component (default: off).",
+    )
+    parser.add_argument(
         "--random-seed",
         type=int,
         help="Optional pipeline random seed override.",
@@ -67,6 +72,7 @@ def main() -> None:
     args = parse_args()
     dataset = get_dataset(args.dataset)
     pipeline_config = RSPPipelineConfig()
+    pipeline_config.scoring.activation_active_fallback_to_base = args.activation_active_fallback_to_base
     if args.rss_rank_cutoff is not None:
         pipeline_config.discovery.rss_rank_cutoff = args.rss_rank_cutoff
     if args.decomposition_backend is not None:

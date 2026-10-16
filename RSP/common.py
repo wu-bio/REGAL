@@ -109,6 +109,7 @@ def activation_active_mask(
     quantile: float,
     min_abs: float,
     min_component_size: int,
+    fallback_to_base: bool = False,
 ) -> tuple[np.ndarray, float]:
     arr = np.clip(np.asarray(values, dtype=np.float32).reshape(-1), 0.0, None)
     if arr.size == 0:
@@ -121,20 +122,21 @@ def activation_active_mask(
         float(max(0.0, min_peak_fraction)) * peak,
         _activation_noise_floor(arr, quantile),
     )
-    base_mask = _filter_active_components(
-        arr >= base_threshold,
-        neighbors,
-        min_component_size=min_component_size,
-    )
     threshold = _activation_elbow_threshold(arr, base_threshold, peak)
     mask = _filter_active_components(
         arr >= threshold,
         neighbors,
         min_component_size=min_component_size,
     )
-    if not np.any(mask) and np.any(base_mask):
-        threshold = base_threshold
-        mask = base_mask
+    if fallback_to_base and not np.any(mask):
+        base_mask = _filter_active_components(
+            arr >= base_threshold,
+            neighbors,
+            min_component_size=min_component_size,
+        )
+        if np.any(base_mask):
+            threshold = base_threshold
+            mask = base_mask
     return mask.astype(bool, copy=False), float(threshold)
 
 

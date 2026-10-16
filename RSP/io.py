@@ -106,6 +106,7 @@ def build_rsp_activation_table(
             quantile=float(scoring_cfg.activation_active_quantile),
             min_abs=float(scoring_cfg.activation_active_min_abs),
             min_component_size=int(scoring_cfg.activation_active_min_component_size),
+            fallback_to_base=bool(scoring_cfg.activation_active_fallback_to_base),
         )
         candidate["activation_active_mask"] = active_mask
         candidate["activation_active_threshold"] = float(active_threshold)
@@ -258,6 +259,7 @@ def build_rsp_family_member_activation_table(
             quantile=float(scoring_cfg.activation_active_quantile),
             min_abs=float(scoring_cfg.activation_active_min_abs),
             min_component_size=int(scoring_cfg.activation_active_min_component_size),
+            fallback_to_base=bool(scoring_cfg.activation_active_fallback_to_base),
         )
         rank_order = np.argsort(-activation)
         ranks = np.zeros(activation.shape[0], dtype=np.int32)

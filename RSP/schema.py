@@ -103,6 +103,7 @@ class RSPScoringConfig:
     activation_active_quantile: float = 0.05
     activation_active_min_abs: float = 1e-6
     activation_active_min_component_size: int = 20
+    activation_active_fallback_to_base: bool = False
     activation_trim_enabled: bool = True
     activation_trim_fraction_of_peak: float = 0.05
     activation_trim_min_abs: float = 1e-6

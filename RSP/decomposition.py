@@ -694,6 +694,7 @@ def _candidate_from_component(
         quantile=float(scoring_cfg.activation_active_quantile),
         min_abs=float(scoring_cfg.activation_active_min_abs),
         min_component_size=int(scoring_cfg.activation_active_min_component_size),
+        fallback_to_base=bool(scoring_cfg.activation_active_fallback_to_base),
     )
     active_count = int(np.count_nonzero(active_mask))
     components = connected_component_indices(active_mask, neighbors)
