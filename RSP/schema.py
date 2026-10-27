@@ -16,7 +16,7 @@ class RSPInputConfig:
 class RSPDiscoveryConfig:
     rss_value_col: str = "rss_score"
     rss_transform: Literal["log1p", "none"] = "none"
-    rss_rank_cutoff: Optional[int] = 3000
+    rss_rank_cutoff: Optional[int] = 1000
     max_genes_for_decomposition: Optional[int] = None
     enable_adaptive_gene_selection: bool = True
     decomposition_backend: Literal[

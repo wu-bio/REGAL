@@ -19,7 +19,7 @@ class PreprocessConfig:
 
 @dataclass
 class LatentConfig:
-    epochs: int = 300
+    epochs: int = 500
     hidden_dims: tuple[int, ...] = (512, 30)
     lr: float = 1e-4
     weight_decay: float = 1e-4

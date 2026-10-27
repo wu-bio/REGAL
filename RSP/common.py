@@ -195,8 +195,16 @@ def gene_mask(genes: np.ndarray, prefixes: tuple[str, ...], exact: tuple[str, ..
 
 def low_info_gene_mask(genes: np.ndarray, prefixes: tuple[str, ...]) -> np.ndarray:
     prefix_upper = tuple(str(x).upper() for x in prefixes)
+    accession_prefixes = {"AC", "AL", "AP"}.intersection(prefix_upper)
+    other_prefixes = tuple(p for p in prefix_upper if p not in accession_prefixes)
     out = np.zeros(np.asarray(genes).shape[0], dtype=bool)
     for idx, gene in enumerate(np.asarray(genes, dtype=str)):
         gu = str(gene).upper()
-        out[idx] = gu.startswith(prefix_upper) or bool(re.match(r"^[A-Z]\d{5,}(?:\.\d+)?$", gu))
+        # Numbered accessions must not match gene symbols such as ACTA2 or ALDOB.
+        accession = re.fullmatch(r"(AC|AL|AP)\d+(?:\.\d+)?", gu)
+        out[idx] = (
+            gu.startswith(other_prefixes)
+            or (accession is not None and accession.group(1) in accession_prefixes)
+            or bool(re.match(r"^[A-Z]\d{5,}(?:\.\d+)?$", gu))
+        )
     return out

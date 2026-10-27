@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-"""Run the official STAMP workflow on the BREAST Visium section."""
+"""Run official STAMP and save raw topics plus spatial active regions."""
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import platform
+import sys
+from dataclasses import asdict
 import tempfile
 from datetime import datetime, timezone
 from importlib.metadata import version
@@ -28,6 +31,16 @@ import torch
 import sctm
 from sctm.seed import seed_everything
 from sctm.stamp import STAMP
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from RSP.common import build_spatial_neighbors, _activation_noise_floor, _filter_active_components
+from RSP.io import _trim_activation_for_output
+from RSP.schema import RSPDiscoveryConfig, RSPScoringConfig, RSPStabilityConfig
+from RSP.stability import _prepare_candidate_for_stability
 
 
 DEFAULT_INPUT = Path(
@@ -197,9 +210,88 @@ def validate_outputs(
         raise RuntimeError("STAMP spot-topic proportions do not sum to one.")
 
 
+def spatial_activation(
+    weights: pd.DataFrame, spatial: np.ndarray,
+) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, np.ndarray, dict]:
+    """Reuse RSP spatial cleanup, but use only the base coverage threshold.
+
+    STAMP deliberately skips the adaptive elbow threshold; RSP stays unchanged.
+
+    This transfers only per-component spatial postprocessing. It does not
+    apply RSS, RSP gene selection, cross-run stability or component merging.
+    Neither counts, gene loadings nor the fitted STAMP weights are changed.
+    """
+    spatial = np.asarray(spatial, dtype=np.float64)
+    if spatial.ndim != 2 or spatial.shape[0] != len(weights) or spatial.shape[1] < 2:
+        raise ValueError("Spatial postprocessing requires spot-aligned coordinates with shape (n_spots, >=2).")
+    if not np.isfinite(spatial[:, :2]).all():
+        raise ValueError("Spatial coordinates must be finite.")
+    discovery = RSPDiscoveryConfig()
+    stability, scoring = RSPStabilityConfig(), RSPScoringConfig()
+    candidate_neighbors = build_spatial_neighbors(spatial, discovery.moran_knn)
+    output_neighbors = build_spatial_neighbors(spatial, discovery.spatial_knn)
+    candidates = []
+    for component in weights.columns:
+        raw = weights[component].to_numpy(dtype=np.float32, copy=True)
+        candidate = {"rsp_id": str(component), "activation_raw": raw, "activation": raw.copy()}
+        _prepare_candidate_for_stability(candidate, stability, candidate_neighbors)
+        candidates.append(candidate)
+    clean = np.column_stack([c["activation_clean"] for c in candidates])
+    tables = []
+    for candidate in candidates:
+        values = _trim_activation_for_output(candidate["activation_clean"], scoring, output_neighbors)
+        peak = float(values.max()) if values.size else 0.0
+        threshold = max(scoring.activation_active_min_abs,
+                        scoring.activation_active_min_peak_fraction * peak,
+                        _activation_noise_floor(values, scoring.activation_active_quantile))
+        mask = _filter_active_components(
+            (values > 0) & (values >= threshold), output_neighbors,
+            min_component_size=scoring.activation_active_min_component_size,
+        )
+        candidate["activation"] = values
+        candidate["activation_active_mask"] = mask
+        order = np.argsort(-values)
+        ranks = np.empty(len(values), dtype=np.int32)
+        ranks[order] = np.arange(1, len(values) + 1)
+        active_order = order[mask[order]]
+        active_ranks = np.zeros(len(values), dtype=np.int32)
+        active_ranks[active_order] = np.arange(1, len(active_order) + 1)
+        tables.append(pd.DataFrame({
+            "component_id": str(candidate["rsp_id"]),
+            "spot_id": weights.index.to_numpy(dtype=str),
+            "activation_raw": candidate["activation_raw"], "activation": values,
+            "rank_in_spot": ranks, "activation_active": mask,
+            "activation_active_rank": active_ranks,
+            "activation_active_threshold": threshold,
+        }))
+    table = pd.concat(tables, ignore_index=True)
+    activation = np.column_stack([c["activation"] for c in candidates])
+    active = np.column_stack([c["activation_active_mask"] for c in candidates])
+    assert activation.shape == weights.shape and active.shape == weights.shape
+    assert active.dtype == bool and np.all(activation[active] > 0)
+    assert np.isfinite(activation).all() and np.all(activation >= 0)
+    assert np.all(activation <= weights.to_numpy(dtype=np.float32))
+    parameters = {
+        "method": "RSP_cleanup_with_base_threshold_only",
+        "activation_active_elbow_enabled": False,
+        "active_threshold_rule": "max(min_abs, min_peak_fraction * peak, positive_quantile)",
+        "spatial_knn": discovery.spatial_knn, "moran_knn": discovery.moran_knn,
+        "candidate_cleanup": {k: v for k, v in asdict(stability).items() if k.startswith("activation_cleanup_")},
+        "output_and_active_region": {k: v for k, v in asdict(scoring).items()
+                                    if k.startswith(("activation_trim_", "activation_active_"))},
+        "uses_truth": False,
+        "coverage_field": "activation_active",
+        "raw_weights_obsm": "STAMP_topics", "activation_obsm": "STAMP_activation",
+        "coverage_obsm": "STAMP_activation_active",
+    }
+    return table, clean, activation, active, parameters
+
+
 def run_stamp(args: argparse.Namespace) -> None:
     if not args.input.is_file():
         raise FileNotFoundError(f"Input h5ad does not exist: {args.input}")
+    if args.output_dir.exists() and any(args.output_dir.iterdir()):
+        raise FileExistsError(f"Refusing to overwrite existing STAMP outputs: {args.output_dir}")
 
     device = resolve_device(args.device)
     seed_everything(args.seed)
@@ -234,9 +326,20 @@ def run_stamp(args: argparse.Namespace) -> None:
     model_path = args.output_dir / "stamp_model_params.pt"
     metadata_path = args.output_dir / "run_metadata.json"
 
+    activation_path = args.output_dir / "stamp_activation.csv"
+    aligned_topics = topics.loc[model_adata.obs_names]
+    activation_table, clean, activation, active, spatial_parameters = spatial_activation(
+        aligned_topics, np.asarray(model_adata.obsm["spatial"]),
+    )
+    activation_table.to_csv(activation_path, index=False)
     topics.rename_axis("spot_id").to_csv(topics_path)
     modules.rename_axis("gene").to_csv(modules_path)
     model_adata.obsm["STAMP_topics"] = topics.loc[model_adata.obs_names].to_numpy()
+    model_adata.obsm["STAMP_activation_clean"] = clean
+    model_adata.obsm["STAMP_activation"] = activation
+    model_adata.obsm["STAMP_activation_active"] = active
+    model_adata.varm["STAMP_gene_modules"] = modules.loc[model_adata.var_names, topics.columns].to_numpy()
+    model_adata.uns["STAMP_spatial_postprocessing"] = spatial_parameters
     model_adata.uns["STAMP_topic_names"] = topics.columns.to_numpy(dtype=str)
     model_adata.write_h5ad(h5ad_path)
     model.save(model_path)
@@ -247,6 +350,9 @@ def run_stamp(args: argparse.Namespace) -> None:
         "source_repository": "https://github.com/JinmiaoChenLab/scTM",
         "workflow": "official_STAMP_breast_cancer_tutorial",
         "python": platform.python_version(),
+        "python_executable": sys.executable,
+        "conda_prefix": os.environ.get("CONDA_PREFIX", ""),
+        "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "sctm_distribution_version": package_version("sctm"),
         "torch": str(torch.__version__),
         "scanpy": package_version("scanpy"),
@@ -273,7 +379,9 @@ def run_stamp(args: argparse.Namespace) -> None:
         "weight_decay": args.weight_decay,
         "early_stop": not args.no_early_stop,
         "patience": args.patience,
+        "spatial_postprocessing": spatial_parameters,
         "outputs": {
+            "activation": str(activation_path),
             "spot_topics": str(topics_path),
             "gene_modules": str(modules_path),
             "h5ad": str(h5ad_path),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run vanilla NMF after STAMP-style filtering and standard log normalization."""
+"""Fit vanilla NMF and save raw weights plus REGAL-style spatial active regions."""
 
 from __future__ import annotations
 
@@ -7,7 +7,9 @@ import argparse
 import json
 import os
 import platform
+import sys
 import tempfile
+from dataclasses import asdict
 from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
@@ -24,6 +26,15 @@ import pandas as pd
 import scanpy as sc
 import scipy.sparse as sp
 from sklearn.decomposition import NMF
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from RSP.common import build_spatial_neighbors, _activation_noise_floor, _filter_active_components
+from RSP.io import _trim_activation_for_output
+from RSP.schema import RSPDiscoveryConfig, RSPScoringConfig, RSPStabilityConfig
+from RSP.stability import _prepare_candidate_for_stability
 
 
 DEFAULT_INPUT = Path(
@@ -153,6 +164,83 @@ def validate_outputs(
         raise RuntimeError("NMF returned negative output values.")
 
 
+def spatial_activation(
+    weights: pd.DataFrame, spatial: np.ndarray,
+) -> tuple[pd.DataFrame, np.ndarray, np.ndarray, np.ndarray, dict]:
+    """Reuse RSP spatial cleanup, but use only the base coverage threshold.
+
+    NMF deliberately skips the adaptive elbow threshold; RSP stays unchanged.
+
+    This transfers only per-component spatial postprocessing. It does not
+    apply RSS, RSP gene selection, cross-run stability or component merging.
+    Neither counts, gene loadings nor the fitted NMF weights are changed.
+    """
+    spatial = np.asarray(spatial, dtype=np.float64)
+    if spatial.ndim != 2 or spatial.shape[0] != len(weights) or spatial.shape[1] < 2:
+        raise ValueError("Spatial postprocessing requires spot-aligned coordinates with shape (n_spots, >=2).")
+    if not np.isfinite(spatial[:, :2]).all():
+        raise ValueError("Spatial coordinates must be finite.")
+    discovery = RSPDiscoveryConfig()
+    stability, scoring = RSPStabilityConfig(), RSPScoringConfig()
+    candidate_neighbors = build_spatial_neighbors(spatial, discovery.moran_knn)
+    output_neighbors = build_spatial_neighbors(spatial, discovery.spatial_knn)
+    candidates = []
+    for component in weights.columns:
+        raw = weights[component].to_numpy(dtype=np.float32, copy=True)
+        candidate = {"rsp_id": str(component), "activation_raw": raw, "activation": raw.copy()}
+        _prepare_candidate_for_stability(candidate, stability, candidate_neighbors)
+        candidates.append(candidate)
+    clean = np.column_stack([c["activation_clean"] for c in candidates])
+    tables = []
+    for candidate in candidates:
+        values = _trim_activation_for_output(candidate["activation_clean"], scoring, output_neighbors)
+        peak = float(values.max()) if values.size else 0.0
+        threshold = max(scoring.activation_active_min_abs,
+                        scoring.activation_active_min_peak_fraction * peak,
+                        _activation_noise_floor(values, scoring.activation_active_quantile))
+        mask = _filter_active_components(
+            (values > 0) & (values >= threshold), output_neighbors,
+            min_component_size=scoring.activation_active_min_component_size,
+        )
+        candidate["activation"] = values
+        candidate["activation_active_mask"] = mask
+        order = np.argsort(-values)
+        ranks = np.empty(len(values), dtype=np.int32)
+        ranks[order] = np.arange(1, len(values) + 1)
+        active_order = order[mask[order]]
+        active_ranks = np.zeros(len(values), dtype=np.int32)
+        active_ranks[active_order] = np.arange(1, len(active_order) + 1)
+        tables.append(pd.DataFrame({
+            "component_id": str(candidate["rsp_id"]),
+            "spot_id": weights.index.to_numpy(dtype=str),
+            "activation_raw": candidate["activation_raw"], "activation": values,
+            "rank_in_spot": ranks, "activation_active": mask,
+            "activation_active_rank": active_ranks,
+            "activation_active_threshold": threshold,
+        }))
+    table = pd.concat(tables, ignore_index=True)
+    activation = np.column_stack([c["activation"] for c in candidates])
+    active = np.column_stack([c["activation_active_mask"] for c in candidates])
+    assert activation.shape == weights.shape and active.shape == weights.shape
+    assert active.dtype == bool and np.all(activation[active] > 0)
+    assert np.isfinite(activation).all() and np.all(activation >= 0)
+    assert np.all(activation <= weights.to_numpy(dtype=np.float32))
+    parameters = {
+        "method": "RSP_cleanup_with_base_threshold_only",
+        "activation_active_elbow_enabled": False,
+        "active_threshold_rule": "max(min_abs, min_peak_fraction * peak, positive_quantile)",
+        "spatial_knn": discovery.spatial_knn, "moran_knn": discovery.moran_knn,
+        "candidate_cleanup": {k: v for k, v in asdict(stability).items() if k.startswith("activation_cleanup_")},
+        "output_and_active_region": {k: v for k, v in asdict(scoring).items()
+                                    if k.startswith(("activation_trim_", "activation_active_"))},
+        "uses_truth": False,
+        "coverage_field": "activation_active",
+        "raw_weights_obsm": "NMF_weights", "activation_obsm": "NMF_activation",
+        "coverage_obsm": "NMF_activation_active",
+    }
+    return table, clean, activation, active, parameters
+
+
 def run_nmf(args: argparse.Namespace) -> None:
     if not args.input.is_file():
         raise FileNotFoundError(f"Input h5ad does not exist: {args.input}")
@@ -161,6 +249,8 @@ def run_nmf(args: argparse.Namespace) -> None:
     n_spots_input, n_genes_input = adata.shape
     validate_raw_counts(adata)
     model_adata = prepare_input(adata, args)
+    if "spatial" not in model_adata.obsm:
+        raise ValueError("Missing obsm['spatial']; required to save spatial NMF coverage.")
     sc.pp.normalize_total(model_adata, target_sum=args.target_sum)
     sc.pp.log1p(model_adata)
     matrix = model_adata.X.tocsr() if sp.issparse(model_adata.X) else np.asarray(model_adata.X)
@@ -189,6 +279,9 @@ def run_nmf(args: argparse.Namespace) -> None:
     weights = pd.DataFrame(weight_values, index=model_adata.obs_names, columns=names)
     loadings = pd.DataFrame(loading_values, index=model_adata.var_names, columns=names)
     validate_outputs(weights, loadings, model_adata.n_obs, model_adata.n_vars, args.k)
+    activation_table, clean, activation, active, spatial_parameters = spatial_activation(
+        weights, model_adata.obsm["spatial"],
+    )
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     weights_path = args.output_dir / "nmf_spot_weights.csv"
@@ -196,12 +289,18 @@ def run_nmf(args: argparse.Namespace) -> None:
     h5ad_path = args.output_dir / "nmf.h5ad"
     model_path = args.output_dir / "nmf_model.joblib"
     metadata_path = args.output_dir / "run_metadata.json"
+    activation_path = args.output_dir / "nmf_activation.csv"
 
     weights.rename_axis("spot_id").to_csv(weights_path)
     loadings.rename_axis("gene").to_csv(loadings_path)
+    activation_table.to_csv(activation_path, index=False)
     model_adata.obsm["NMF_weights"] = weights.to_numpy()
+    model_adata.obsm["NMF_activation_clean"] = clean
+    model_adata.obsm["NMF_activation"] = activation
+    model_adata.obsm["NMF_activation_active"] = active
     model_adata.varm["NMF_loadings"] = loadings.to_numpy()
     model_adata.uns["NMF_component_names"] = np.asarray(names, dtype=str)
+    model_adata.uns["NMF_spatial_postprocessing"] = spatial_parameters
     model_adata.write_h5ad(h5ad_path)
     joblib.dump(model, model_path)
 
@@ -237,12 +336,16 @@ def run_nmf(args: argparse.Namespace) -> None:
             "reconstruction_error": float(model.reconstruction_err_),
             "regularization": "none",
         },
-        "spatial_information_used": False,
+        "spatial_information_used": True,
+        "spatial_information_used_for_fitting": False,
+        "spatial_information_used_for_postprocessing": True,
+        "spatial_postprocessing": spatial_parameters,
         "outputs": {
             "spot_weights": str(weights_path),
             "gene_loadings": str(loadings_path),
             "h5ad": str(h5ad_path),
             "model": str(model_path),
+            "activation": str(activation_path),
         },
     }
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")

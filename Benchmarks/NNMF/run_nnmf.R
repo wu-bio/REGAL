@@ -13,7 +13,7 @@ DEFAULT_LENGTHSCALE <- 324.128494
 usage <- function() {
   cat(paste0(
     "Usage: run_nnmf.R [options]\n\n",
-    "Learn native NNMF spot weights and gene signatures at one explicitly fixed rank.\n\n",
+    "Learn native NNMF weights/signatures and save base-threshold spatial coverage.\n\n",
     "Model rank:\n",
     "  --k INTEGER               Number of signatures (default: ", DEFAULT_K, ";\n",
     "                            BREAST AIC scan with seed sensitivity review)\n\n",
@@ -289,6 +289,88 @@ validate_result <- function(result, n_spots, n_genes, k) {
   }
 }
 
+# Per-signature spatial cleanup; no adaptive elbow or truth-dependent threshold.
+# Neighbor-distance ties use spot order for a deterministic native R graph.
+spatial_activation <- function(weights, coordinates) {
+  weights <- as.matrix(weights)
+  coordinates <- as.matrix(coordinates)
+  n <- nrow(weights)
+  if (n < 2L || nrow(coordinates) != n || ncol(coordinates) < 2L ||
+      any(!is.finite(coordinates)) || any(!is.finite(weights)) || any(weights < 0)) {
+    stop("Spatial postprocessing requires finite aligned coordinates and nonnegative weights.", call. = FALSE)
+  }
+  neighbors <- matrix(0L, n, min(6L, n - 1L))
+  xy <- coordinates[, 1:2, drop = FALSE]
+  for (i in seq_len(n)) {
+    distances <- rowSums(sweep(xy, 2L, xy[i, ], "-")^2)
+    distances[i] <- Inf
+    neighbors[i, ] <- order(distances, method = "radix")[seq_len(ncol(neighbors))]
+  }
+  filter_components <- function(mask, minimum) {
+    keep <- visited <- rep(FALSE, n)
+    for (start in which(mask)) {
+      if (visited[start]) next
+      stack <- start
+      visited[start] <- TRUE
+      nodes <- integer(0)
+      while (length(stack)) {
+        node <- stack[length(stack)]
+        stack <- stack[-length(stack)]
+        nodes <- c(nodes, node)
+        next_nodes <- neighbors[node, ]
+        next_nodes <- next_nodes[mask[next_nodes] & !visited[next_nodes]]
+        visited[next_nodes] <- TRUE
+        stack <- c(stack, next_nodes)
+      }
+      if (length(nodes) >= minimum) keep[nodes] <- TRUE
+    }
+    keep
+  }
+  clean <- activation <- matrix(0, n, ncol(weights), dimnames = dimnames(weights))
+  active <- matrix(FALSE, n, ncol(weights), dimnames = dimnames(weights))
+  tables <- vector("list", ncol(weights))
+  for (j in seq_len(ncol(weights))) {
+    v <- weights[, j]
+    v[v < max(1e-6, .05 * max(v))] <- 0
+    v[!filter_components(v > 0, 5L)] <- 0
+    clean[, j] <- v
+    v[v < max(1e-6, .05 * max(v))] <- 0
+    v[!filter_components(v > 0, 20L)] <- 0
+    activation[, j] <- v
+    positive <- v[v > 0]
+    floor <- if (length(positive)) as.numeric(stats::quantile(positive, .05, names = FALSE, type = 7L)) else 0
+    threshold <- max(1e-6, .10 * max(v), floor)
+    mask <- filter_components(v > 0 & v >= threshold, 20L)
+    active[, j] <- mask
+    ordering <- order(-v, seq_len(n))
+    ranks <- active_ranks <- integer(n)
+    ranks[ordering] <- seq_len(n)
+    active_order <- ordering[mask[ordering]]
+    active_ranks[active_order] <- seq_along(active_order)
+    tables[[j]] <- data.frame(
+      component_id = colnames(weights)[j], spot_id = rownames(weights),
+      activation_raw = weights[, j], activation = v, rank_in_spot = ranks,
+      activation_active = mask, activation_active_rank = active_ranks,
+      activation_active_threshold = threshold, row.names = NULL
+    )
+  }
+  list(activation_clean = clean, activation = activation, activation_active = active,
+       table = do.call(rbind, tables), parameters = list(
+         method = "RSP_cleanup_with_base_threshold_only", activation_active_elbow_enabled = FALSE,
+         active_threshold_rule = "max(min_abs, min_peak_fraction * peak, positive_quantile)",
+         spatial_knn = 6L, moran_knn = 6L, neighbor_distance_ties = "ascending spot order",
+         candidate_cleanup = list(activation_cleanup_min_abs = 1e-6,
+                                 activation_cleanup_min_peak_fraction = .05,
+                                 activation_cleanup_min_component_size = 5L),
+         output_and_active_region = list(activation_trim_enabled = TRUE,
+           activation_trim_fraction_of_peak = .05, activation_trim_min_abs = 1e-6,
+           activation_trim_min_component_size = 20L, activation_active_min_peak_fraction = .10,
+           activation_active_quantile = .05, activation_active_min_abs = 1e-6,
+           activation_active_min_component_size = 20L, activation_active_fallback_to_base = FALSE),
+         uses_truth = FALSE, coverage_field = "activation_active", raw_weights_field = "weights",
+         activation_field = "activation", coverage_object_field = "activation_active"))
+}
+
 run_nnmf <- function(args) {
   require_package("NNMF")
   require_package("Matrix")
@@ -334,11 +416,18 @@ run_nnmf <- function(args) {
   rownames(result$signatures) <- signature_names
   colnames(result$signatures) <- prepared$genes
 
+  spatial <- spatial_activation(result$weights, prepared$coordinates)
+  result$activation_clean <- spatial$activation_clean
+  result$activation <- spatial$activation
+  result$activation_active <- spatial$activation_active
+  result$spatial_postprocessing <- spatial$parameters
+
   output_dir <- path.expand(args$output_dir)
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   weights_csv <- file.path(output_dir, "nnmf_weights.csv")
   signatures_csv <- file.path(output_dir, "nnmf_signatures.csv")
   full_rds <- file.path(output_dir, "nnmf_full_results.rds")
+  activation_csv <- file.path(output_dir, "nnmf_activation.csv")
   metadata_json <- file.path(output_dir, "run_metadata.json")
 
   weights_table <- data.frame(spot_id = prepared$spots, result$weights, check.names = FALSE)
@@ -349,6 +438,7 @@ run_nnmf <- function(args) {
   )
   utils::write.csv(weights_table, weights_csv, row.names = FALSE)
   utils::write.csv(signatures_table, signatures_csv, row.names = FALSE)
+  utils::write.csv(spatial$table, activation_csv, row.names = FALSE)
   saveRDS(result, full_rds)
 
   metadata <- list(
@@ -384,10 +474,12 @@ run_nnmf <- function(args) {
     initial = args$initial,
     small_iter = args$small_iter,
     final_gkl = result$error,
+    spatial_postprocessing = spatial$parameters,
     outputs = list(
       spot_weights = weights_csv,
       gene_signatures = signatures_csv,
-      full_results = full_rds
+      full_results = full_rds,
+      activation = activation_csv
     )
   )
   jsonlite::write_json(metadata, metadata_json, auto_unbox = TRUE, pretty = TRUE, null = "null")

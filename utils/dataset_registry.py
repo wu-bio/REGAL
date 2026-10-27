@@ -33,6 +33,16 @@ class DatasetSpec:
 
 
 DATASETS: dict[str, DatasetSpec] = {
+    "SIMULATION": DatasetSpec(
+        "external_dataset",
+        "SIMULATION",
+        (
+            "regional_activity_16_heterogeneous_seed2026",
+        ),
+        species="synthetic",
+        condition="simulated regional gene activities",
+        expression_state="raw_counts",
+    ),
     "COAD": DatasetSpec(
         "pan_cancer",
         "COAD",
