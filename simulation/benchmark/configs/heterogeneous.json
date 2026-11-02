@@ -1,0 +1,678 @@
+{
+  "sample_id": "regional_activity_16_heterogeneous_seed2026",
+  "output_root": "/Users/wuyang/Documents/SC-ST data/SIMULATION/ST/regional_activity_16_heterogeneous_seed2026",
+  "nside": 64,
+  "n_genes": 5000,
+  "structure_seed": 1601,
+  "expression_seed": 2026,
+  "signal_scale": 1.0,
+  "activity_strengths": [
+    1.0,
+    0.8,
+    1.2,
+    0.9,
+    0.9,
+    1.2,
+    1.0,
+    0.8,
+    1.1,
+    0.85,
+    0.9,
+    1.15,
+    1.0,
+    0.85,
+    1.1,
+    0.95
+  ],
+  "within_region_amplitude": 0.15,
+  "specific_genes_per_activity": [
+    24,
+    49,
+    81,
+    37,
+    65,
+    28,
+    45,
+    89,
+    32,
+    73,
+    53,
+    97,
+    41,
+    81,
+    28,
+    61
+  ],
+  "shared_genes_per_pair": [
+    22,
+    37,
+    28,
+    44,
+    33,
+    18,
+    41,
+    30
+  ],
+  "shared_genes_per_group": [
+    21,
+    28,
+    35,
+    42
+  ],
+  "loading_mean": 5.0,
+  "loading_log_sd": 0.6,
+  "broad_background_genes": 700,
+  "broad_background_mean": 2.0,
+  "unstructured_background_mean": 0.15,
+  "baseline_log_sd": 0.4,
+  "nonspatial_factors": 5,
+  "genes_per_nonspatial_factor": 120,
+  "nonspatial_probability": 0.2,
+  "nonspatial_loading_mean": 2.0,
+  "depth_log_sd": 0.35,
+  "nb_shape": 10.0,
+  "local_deviation_fraction": 0.1,
+  "local_multiplier_min": 0.75,
+  "local_multiplier_max": 1.25,
+  "activities": [
+    {
+      "id": "ACT01",
+      "relation": "primary",
+      "scale": "primary",
+      "instances": [
+        {
+          "landscape_component": 1
+        },
+        {
+          "landscape_component": 2
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT02",
+      "relation": "primary",
+      "scale": "primary",
+      "instances": [
+        {
+          "landscape_component": 1
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT03",
+      "relation": "primary",
+      "scale": "primary",
+      "instances": [
+        {
+          "landscape_component": 1
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT04",
+      "relation": "primary",
+      "scale": "partition",
+      "instances": [
+        {
+          "landscape_component": 1
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT05",
+      "relation": "primary",
+      "scale": "primary",
+      "instances": [
+        {
+          "landscape_component": 1
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT06",
+      "relation": "primary",
+      "scale": "primary",
+      "instances": [
+        {
+          "landscape_component": 1
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT07",
+      "relation": "primary",
+      "scale": "primary",
+      "instances": [
+        {
+          "landscape_component": 1
+        },
+        {
+          "landscape_component": 2
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT08",
+      "relation": "overlay",
+      "scale": "overlay",
+      "instances": [
+        {
+          "ellipse": [
+            32,
+            16,
+            7.5,
+            8,
+            0
+          ],
+          "phase": 0.4,
+          "ripple": 0.04
+        }
+      ],
+      "expression": {
+        "regional_scale": 3.0,
+        "baseline_scale": 3.0
+      }
+    },
+    {
+      "id": "ACT09",
+      "relation": "primary",
+      "scale": "partition",
+      "instances": [
+        {
+          "landscape_component": 1
+        }
+      ],
+      "expression": {
+        "regional_scale": 3.0,
+        "baseline_scale": 3.0
+      }
+    },
+    {
+      "id": "ACT10",
+      "relation": "subregion",
+      "scale": "subregion",
+      "instances": [
+        {
+          "child_component": 1
+        }
+      ],
+      "expression": {
+        "regional_scale": 3.0,
+        "baseline_scale": 3.0
+      }
+    },
+    {
+      "id": "ACT11",
+      "relation": "overlay",
+      "scale": "overlay",
+      "instances": [
+        {
+          "ellipse": [
+            7,
+            38,
+            6.5,
+            7,
+            -10
+          ],
+          "phase": 0.4,
+          "ripple": 0.05
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT12",
+      "relation": "overlay",
+      "scale": "overlay",
+      "instances": [
+        {
+          "ellipse": [
+            54,
+            44,
+            8,
+            6,
+            10
+          ],
+          "phase": 0.9,
+          "ripple": 0.05
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT13",
+      "relation": "overlay",
+      "scale": "overlay",
+      "instances": [
+        {
+          "ellipse": [
+            8,
+            23,
+            7,
+            5.5,
+            -5
+          ],
+          "phase": 1.2,
+          "ripple": 0.05
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT14",
+      "relation": "overlay",
+      "scale": "overlay",
+      "instances": [
+        {
+          "ellipse": [
+            54,
+            57,
+            7,
+            5.5,
+            0
+          ],
+          "phase": 0.6,
+          "ripple": 0.04
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT15",
+      "relation": "overlay",
+      "scale": "overlay",
+      "instances": [
+        {
+          "ellipse": [
+            8,
+            11,
+            7,
+            5.5,
+            0
+          ],
+          "phase": 0.8,
+          "ripple": 0.04
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    },
+    {
+      "id": "ACT16",
+      "relation": "overlay",
+      "scale": "overlay",
+      "instances": [
+        {
+          "ellipse": [
+            39,
+            36,
+            9,
+            7,
+            10
+          ],
+          "phase": 0.3,
+          "ripple": 0.04,
+          "allowed_primary_ids": [
+            "ACT03",
+            "ACT07"
+          ]
+        }
+      ],
+      "expression": {
+        "regional_scale": 1.0,
+        "baseline_scale": 1.0
+      }
+    }
+  ],
+  "relation_pairs": [
+    {
+      "a": "ACT01",
+      "b": "ACT02",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT01",
+      "b": "ACT05",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT01",
+      "b": "ACT07",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT02",
+      "b": "ACT03",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT02",
+      "b": "ACT05",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT02",
+      "b": "ACT06",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT03",
+      "b": "ACT04",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT03",
+      "b": "ACT06",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT03",
+      "b": "ACT07",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT04",
+      "b": "ACT07",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT05",
+      "b": "ACT06",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT06",
+      "b": "ACT07",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT01",
+      "b": "ACT11",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT01",
+      "b": "ACT12",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT01",
+      "b": "ACT13",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT01",
+      "b": "ACT14",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT01",
+      "b": "ACT15",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT02",
+      "b": "ACT08",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT03",
+      "b": "ACT16",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT04",
+      "b": "ACT09",
+      "relation": "adjacent"
+    },
+    {
+      "a": "ACT05",
+      "b": "ACT11",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT06",
+      "b": "ACT10",
+      "relation": "nested"
+    },
+    {
+      "a": "ACT07",
+      "b": "ACT12",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT07",
+      "b": "ACT13",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT07",
+      "b": "ACT14",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT07",
+      "b": "ACT15",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT07",
+      "b": "ACT16",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT03",
+      "b": "ACT08",
+      "relation": "partial_overlap"
+    },
+    {
+      "a": "ACT03",
+      "b": "ACT09",
+      "relation": "adjacent"
+    }
+  ],
+  "program_baseline_classes": [
+    {
+      "name": "low",
+      "fraction": 0.35,
+      "mean": 0.08
+    },
+    {
+      "name": "medium",
+      "fraction": 0.4,
+      "mean": 0.8
+    },
+    {
+      "name": "high",
+      "fraction": 0.25,
+      "mean": 3.0
+    }
+  ],
+  "normalization_target_sum": 10000.0,
+  "regional_enhancement": {
+    "minimum_expected_fold": 4.0,
+    "minimum_expected_increment": 4.0,
+    "weight_spread": 0.25
+  },
+  "expected_regional_genes": 1263,
+  "landscape_layout": {
+    "primary_activity_ids": [
+      "ACT01",
+      "ACT02",
+      "ACT03",
+      "ACT04",
+      "ACT05",
+      "ACT06",
+      "ACT07",
+      "ACT09"
+    ],
+    "remote_patches": [
+      {
+        "activity_id": "ACT01",
+        "ellipse": [
+          54,
+          51,
+          6.5,
+          6.5,
+          10
+        ],
+        "ripple": 0.04,
+        "phase": 0.2
+      },
+      {
+        "activity_id": "ACT07",
+        "ellipse": [
+          8,
+          18,
+          6.5,
+          6.5,
+          -5
+        ],
+        "ripple": 0.04,
+        "phase": 0.6
+      }
+    ],
+    "minimum_instance_spots": 90,
+    "scale_fraction_ranges": {
+      "primary": [
+        0.12,
+        0.155
+      ],
+      "subregion": [
+        0.04,
+        0.1
+      ],
+      "overlay": [
+        0.025,
+        0.05
+      ],
+      "partition": [
+        0.06,
+        0.1
+      ]
+    },
+    "maximum_active_layers": 2,
+    "maximum_overlapping_member_jaccard": 0.15,
+    "maximum_overlapping_weight_cosine": 0.3,
+    "overlays_avoid_heterogeneous_parents": true,
+    "child_fraction_of_parent_range": [
+      0.4,
+      0.5
+    ],
+    "act04_act09_boundary": [
+      17.5,
+      1.2,
+      7,
+      0.5
+    ]
+  },
+  "heterogeneous_partitions": [
+    {
+      "parent": "ACT06",
+      "children": [
+        "ACT10"
+      ],
+      "axis": "x",
+      "boundary": [
+        32,
+        1.1,
+        8,
+        0.3
+      ]
+    }
+  ],
+  "shared_pair_groups": [
+    [
+      "ACT04",
+      "ACT11"
+    ],
+    [
+      "ACT01",
+      "ACT03"
+    ],
+    [
+      "ACT06",
+      "ACT12"
+    ],
+    [
+      "ACT05",
+      "ACT07"
+    ],
+    [
+      "ACT09",
+      "ACT10"
+    ],
+    [
+      "ACT02",
+      "ACT08"
+    ],
+    [
+      "ACT13",
+      "ACT14"
+    ],
+    [
+      "ACT15",
+      "ACT16"
+    ]
+  ],
+  "expression_noise": {
+    "enabled": true,
+    "seed": 2027,
+    "log_sd": 1.0,
+    "nb_shape": 2.0
+  },
+  "spatial_heterogeneity": {
+    "enabled": true,
+    "seed": 2028,
+    "correlation_length": 3.0,
+    "preference_log_sd": 0.5,
+    "patch_probability": 0.65,
+    "patch_attenuation": 0.75,
+    "patch_radius_min": 1.5,
+    "patch_radius_max": 3.0,
+    "boundary_width": 0.75,
+    "boundary_shift": 0.35
+  }
+}

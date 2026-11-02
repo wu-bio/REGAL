@@ -27,6 +27,7 @@ Together, the spatial deployment and overlap of retained RSPs form the regional 
 - `RSMD/` smooths and thresholds RSP activation fields to delineate connected RSDs and construct RSMDs.
 - `utils/` provides dataset registration, AnnData schema checks, bundle I/O, and shared utilities.
 - `Benchmarks/` contains comparator and RSS-ablation workflows.
+- `simulation/` contains reproducible dataset generators, layouts, configurations, and input checks; see [simulation/README.md](simulation/README.md).
 - `Deconvolution/` contains optional deconvolution utilities used for selected datasets.
 
 ## Installation

@@ -1,0 +1,63 @@
+{
+  "sample_prefix": "regional_activity_11_resolution_seed2026",
+  "data_root": "/Users/wuyang/Documents/SC-ST data/SIMULATION/ST",
+  "high_nside": 128,
+  "resolutions": [128, 64, 32],
+  "n_genes": 5000,
+  "structure_seed": 1601,
+  "expression_seed": 2026,
+  "observation_seed": 2027,
+  "heterogeneity_seed": 2028,
+  "instance_seed": 2029,
+  "target_mean_counts": 5755.785400390625,
+  "normalization_target_sum": 10000.0,
+  "activity_strengths": [1.0, 0.9, 1.1, 0.85, 1.15, 0.95, 0.8, 1.05, 1.2, 0.9, 1.0],
+  "within_region_amplitude": 0.15,
+  "specific_genes_per_activity": [65, 49, 81, 55, 73, 45, 61, 89, 53, 97, 41],
+  "shared_gene_sets": [
+    {"activities": ["A1", "A2"], "n_genes": 30},
+    {"activities": ["A4", "A10"], "n_genes": 28},
+    {"activities": ["A4", "A11"], "n_genes": 24},
+    {"activities": ["A1", "A11"], "n_genes": 26},
+    {"activities": ["A3", "A5"], "n_genes": 22},
+    {"activities": ["A6", "A7"], "n_genes": 32},
+    {"activities": ["A8", "A9"], "n_genes": 28},
+    {"activities": ["A3", "A4", "A10"], "n_genes": 25},
+    {"activities": ["A1", "A4", "A11"], "n_genes": 28}
+  ],
+  "loading_mean": 5.0,
+  "loading_log_sd": 0.6,
+  "baseline_log_sd": 0.4,
+  "program_baseline_classes": [
+    {"name": "low", "fraction": 0.35, "mean": 0.08},
+    {"name": "medium", "fraction": 0.4, "mean": 0.8},
+    {"name": "high", "fraction": 0.25, "mean": 3.0}
+  ],
+  "broad_background_genes": 700,
+  "broad_background_mean": 2.0,
+  "unstructured_background_mean": 0.15,
+  "nonspatial_factors": 5,
+  "genes_per_nonspatial_factor": 120,
+  "nonspatial_probability": 0.2,
+  "nonspatial_loading_mean": 2.0,
+  "depth_log_sd": 0.35,
+  "observation_log_sd": 1.0,
+  "nb_shape": 2.0,
+  "local_deviation_fraction": 0.1,
+  "local_multiplier_min": 0.75,
+  "local_multiplier_max": 1.25,
+  "regional_enhancement": {
+    "minimum_expected_fold": 4.0,
+    "minimum_expected_increment": 4.0,
+    "weight_spread": 0.25
+  },
+  "spatial_heterogeneity": {
+    "correlation_length": 6.0,
+    "preference_log_sd": 0.5,
+    "patch_probability": 0.65,
+    "patch_attenuation": 0.75,
+    "patch_radius_min": 3.0,
+    "patch_radius_max": 6.0
+  },
+  "observation_gene_chunk_size": 128
+}
