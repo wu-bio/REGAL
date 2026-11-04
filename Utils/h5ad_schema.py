@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 
-from utils.dataset_registry import DatasetSpec
+from Utils.dataset_registry import DatasetSpec
 
 
 @dataclass(frozen=True)

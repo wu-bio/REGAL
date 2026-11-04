@@ -1,0 +1,605 @@
+# Janesick paper-derived anchors for case interpretation.
+# Keep this file for statements supported by the original paper.
+
+tumor_region_definitions:
+  note: >
+    These definitions separate region anchors from evidence cell types. Region
+    labels define the spatial tumor domains used by the case analyses; cell
+    types describe biological populations observed within or around those
+    regions.
+
+  regions:
+    DCIS_1:
+      display_name: "DCIS#1"
+      definition_basis: "mapped Xenium cell-type label"
+      defining_cell_types: ["DCIS_1"]
+      interpretation: "DCIS#1 region anchor defined by mapped Xenium DCIS_1 cells."
+    DCIS_2:
+      display_name: "DCIS#2"
+      definition_basis: "mapped Xenium cell-type label"
+      defining_cell_types: ["DCIS_2"]
+      interpretation: "DCIS#2 region anchor defined by mapped Xenium DCIS_2 cells."
+    Invasive:
+      display_name: "Invasive"
+      definition_basis: "mapped Xenium invasive tumor-cell labels"
+      defining_cell_types: ["Invasive_Tumor", "Prolif_Invasive_Tumor"]
+      interpretation: "Invasive region anchor defined by mapped Xenium Invasive_Tumor or Prolif_Invasive_Tumor cells."
+
+dcis_dual_identity:
+  narrative_question: >
+    DCIS#1 and DCIS#2 are both DCIS regions, but DCIS#2 shows
+    more invasive-like cell composition, myoepithelial differences,
+    and a higher-grade possibility raised in the Discussion.
+
+  evidence_blocks:
+    shared_dcis_identity:
+      claim: "DCIS#1 and DCIS#2 are two molecularly distinct DCIS regions."
+      evidence_types: ["marker_gene"]
+      comparison: "DCIS#1 and DCIS#2 versus invasive region"
+      evidence:
+        observations:
+          - "Visium pinpointed two molecularly distinct DCIS regions, named DCIS#1 and DCIS#2."
+          - "AGR3 was identified as a tumor epithelial marker associated with DCIS regions, but not the invasive region."
+        genes:
+          present_in_dcis_regions: ["AGR3"]
+          absent_from_invasive_region: ["AGR3"]
+        region_labels:
+          contextual: ["DCIS#1", "DCIS#2"]
+
+    dcis1_exclusive_identity:
+      claim: "DCIS#1 has an exclusive molecular marker in the original analysis."
+      evidence_types: ["marker_gene"]
+      comparison: "DCIS#1 region versus other tumor regions"
+      evidence:
+        observations:
+          - "MZB1 is an exclusive marker of the DCIS#1 region and cell type."
+        genes:
+          exclusive_to_region: ["MZB1"]
+        region_labels:
+          contextual: ["DCIS#1"]
+
+    dcis1_myoepithelial_context:
+      claim: "DCIS#1 myoepithelial cells show higher ALDH1A3, KRT15, and KRT23."
+      evidence_types: ["marker_gene", "cell_composition", "discussion_interpretation"]
+      comparison: "DCIS#1 region versus DCIS#2 region and invasive region"
+      evidence:
+        observations:
+          - "ALDH1A3, KRT15, and KRT23 were highly expressed in myoepithelial cells of the DCIS#1 region."
+          - "ALDH1A3, also called RALDH3, catalyzes retinoic acid formation."
+          - "The paper cites cell-line evidence that retinoic acid can increase adhesion to the basement membrane in breast myoepithelial cells and thereby decrease invasive capacity of tumor epithelium."
+        genes:
+          higher_in_dcis1_myoepithelial_cells: ["ALDH1A3", "KRT15", "KRT23"]
+        cell_types:
+          contextual: ["Myoepi_KRT15+"]
+        region_labels:
+          contextual: ["DCIS#1"]
+      interpretation:
+        author_context: "ALDH1A3 is discussed through retinoic acid formation and basement-membrane adhesion literature."
+      caution:
+        - "Treat the ALDH1A3-retinoic-acid interpretation as discussion-level support, not direct functional validation in this dataset."
+
+    dcis2_invasive_cells_within_region:
+      claim: "Invasive tumor cells appear within the DCIS#2 region."
+      evidence_types: ["cell_composition", "spatial_relation"]
+      comparison: "DCIS#2 region versus DCIS#1 region"
+      evidence:
+        observations:
+          - "Invasive tumor cells were found within the DCIS#2 region."
+          - "The DCIS#2 region contained many more invasive cells than the DCIS#1 region."
+          - "The authors state that this suggests DCIS#2 is more invasive than DCIS#1."
+        cell_types:
+          present_within_region: ["Invasive_Tumor"]
+          increased_in_region: ["Invasive_Tumor"]
+        region_labels:
+          contextual: ["DCIS#2"]
+        spatial_relation:
+          - "Invasive tumor cells are located within the DCIS#2 region."
+      interpretation:
+        author_conclusion: "DCIS#2 region is more invasive than DCIS#1 region."
+
+    dcis2_myoepithelial_difference:
+      claim: "DCIS#2 differs from DCIS#1 in myoepithelial cell composition and local spatial organization."
+      evidence_types: ["cell_composition", "marker_gene", "spatial_relation"]
+      comparison: "DCIS#2 region versus DCIS#1 region and invasive region"
+      evidence:
+        observations:
+          - "DCIS#2 has fewer KRT15+ myoepithelial cells than DCIS#1."
+          - "ACTA2+ myoepithelial cells were prominent in the DCIS#2 region, less common in the DCIS#1 region, and absent in the invasive region."
+          - "Xenium resolved a thin boundary of ACTA2+ myoepithelial cells encircling invasive cells in the DCIS#2 region."
+        genes:
+          prominent_in_dcis2: ["ACTA2"]
+          reduced_in_dcis2: ["KRT15"]
+        cell_types:
+          prominent_in_dcis2: ["Myoepi_ACTA2+"]
+          reduced_in_dcis2: ["Myoepi_KRT15+"]
+          nearby_context: ["Invasive_Tumor"]
+        region_labels:
+          contextual: ["DCIS#2"]
+        spatial_relation:
+          - "Thin ACTA2+ myoepithelial boundary encircling invasive cells in the DCIS#2 region."
+      caution:
+        - "Do not infer temporal succession, transition, or replacement from the ACTA2/KRT15 spatial observation alone."
+
+    dcis2_stromal_context:
+      claim: "GJB2+ stromal cells are found in the DCIS#2 region."
+      evidence_types: ["marker_gene", "cell_composition"]
+      comparison: "DCIS#2 region versus other tumor regions"
+      evidence:
+        observations:
+          - "GJB2+ stromal cells were found in the DCIS#2 region."
+        genes:
+          present_in_dcis2_stromal_context: ["GJB2"]
+        cell_types:
+          contextual: ["Stromal"]
+        region_labels:
+          contextual: ["DCIS#2"]
+
+    dcis2_higher_grade_hint:
+      claim: "Reduced myoepithelial markers and increased invasive markers in DCIS#2 could indicate a higher grade tumor."
+      evidence_types: ["marker_gene", "cell_composition", "discussion_interpretation"]
+      comparison: "DCIS#2 region versus DCIS#1 region and invasive region"
+      evidence:
+        observations:
+          - "The comparison of two DCIS regions revealed reduced myoepithelial markers KRT15, KRT23, and ALDH1A3 in DCIS#2."
+          - "The authors also describe increased invasive markers in DCIS#2."
+          - "The paper states that this could indicate a higher grade tumor."
+        genes:
+          reduced_myoepithelial_markers: ["KRT15", "KRT23", "ALDH1A3"]
+        cell_types:
+          present_within_region: ["Invasive_Tumor"]
+          reduced_in_region: ["Myoepi_KRT15+"]
+        region_labels:
+          contextual: ["DCIS#2"]
+      interpretation:
+        author_conclusion: "These features could indicate a higher grade tumor."
+      caution:
+        - "Use 'could indicate' wording; do not treat higher grade as a definitive label assigned by gsNiche."
+
+  marker_index:
+    AGR3:
+      role: "DCIS region-associated tumor epithelial marker"
+      evidence_blocks: ["shared_dcis_identity"]
+      pattern: "Associated with DCIS regions, but not the invasive region."
+
+    MZB1:
+      role: "DCIS#1 exclusive marker"
+      evidence_blocks: ["dcis1_exclusive_identity"]
+      pattern: "Exclusive marker of the DCIS#1 region and cell type."
+
+    ALDH1A3:
+      role: "DCIS#1 myoepithelial marker with retinoic acid discussion context"
+      evidence_blocks:
+        - "dcis1_myoepithelial_context"
+        - "dcis2_higher_grade_hint"
+      pattern: "Higher in myoepithelial cells of the DCIS#1 region; reduced in DCIS#2."
+      caution: "Retinoic-acid interpretation is discussion-level support, not direct functional validation in this dataset."
+
+    KRT15:
+      role: "Myoepithelial marker and KRT15+ myoepithelial cell-label reference"
+      evidence_blocks:
+        - "dcis1_myoepithelial_context"
+        - "dcis2_myoepithelial_difference"
+        - "dcis2_higher_grade_hint"
+      pattern: "Higher in DCIS#1 myoepithelial cells; fewer KRT15+ myoepithelial cells in DCIS#2."
+
+    KRT23:
+      role: "DCIS#1 myoepithelial marker"
+      evidence_blocks:
+        - "dcis1_myoepithelial_context"
+        - "dcis2_higher_grade_hint"
+      pattern: "Higher in myoepithelial cells of the DCIS#1 region; reduced in DCIS#2."
+
+    ACTA2:
+      role: "ACTA2+ myoepithelial population marker"
+      evidence_blocks: ["dcis2_myoepithelial_difference"]
+      pattern: "ACTA2+ myoepithelial cells are prominent in the DCIS#2 region, less common in the DCIS#1 region, and absent in the invasive region."
+      spatial_context: "Thin ACTA2+ myoepithelial boundary encircling invasive cells in the DCIS#2 region."
+
+    GJB2:
+      role: "DCIS#2 stromal context marker"
+      evidence_blocks: ["dcis2_stromal_context"]
+      pattern: "GJB2+ stromal cells were found in the DCIS#2 region."
+
+invasive_tumor_front:
+  narrative_question: >
+    The invasive tumor front is defined for analysis by mapped Xenium
+    Invasive_Tumor or Prolif_Invasive_Tumor cells. The paper describes
+    this invasive tumor context as having high invasive tumor-cell incidence,
+    complete absence of myoepithelial cell types, FASN-positive invasive
+    tumor marker context, Visium CDH2 and mitochondrial-probe spatial
+    association, slightly increased endothelial cells, DCIS-marker absence,
+    and macrophage-marker context with MMP12 absence.
+
+  spneigh_center_edge_readback:
+    source: "SpNeigh breast-cancer centroid-gradient analysis"
+    claim: "Invasive tumor cells form distinct peripheral and centroid-proximal transcriptional states."
+    peripheral_genes: ["CEACAM6", "AGR3"]
+    centroid_proximal_genes: ["DUSP2"]
+    interpretation: >
+      Independent single-cell-resolution evidence supports a radial
+      transcriptional reorganization of the invasive tumor carrier, matching
+      the center-versus-edge organization captured by RSP0001 and RSP0015.
+
+  evidence_blocks:
+    invasive_marker_context:
+      claim: "The invasive region shows a tumor-marker program including FASN and additional tumor/proliferation markers."
+      evidence_types: ["marker_gene"]
+      comparison: "Invasive tumor-marker identity"
+      evidence:
+        observations:
+          - "In Fig. 3, selected genes representing major cell types include invasive tumor marked by FASN."
+          - "In Fig. 4d, the tumor marker panel shows invasive region expression of FASN, FOXA1, GATA3, TACSTD2, ABCC11, and MKI67."
+          - "CEACAM6 is shown as a DCIS marker in Fig. 3 and is stronger in DCIS regions than in the invasive region in Fig. 4d."
+        genes:
+          invasive_marker: ["FASN"]
+          tumor_marker_context: ["FOXA1", "GATA3", "TACSTD2", "ABCC11"]
+          proliferation_context: ["MKI67"]
+        region_labels:
+          contextual: ["Invasive"]
+      caution:
+        - "FASN is the clearest paper-labeled invasive tumor marker anchor; the broader tumor marker panel should be interpreted as context, not as proof that each gene is invasive-specific."
+
+    visium_invasive_spatial_markers:
+      claim: "CDH2 and MT-ND1 mark Visium-level spatial features associated with the invasive region."
+      evidence_types: ["marker_gene", "spatial_relation"]
+      comparison: "Visium spatial concordance"
+      evidence:
+        observations:
+          - "In Fig. 2c, CDH2 is shown as an invasive-associated Visium spatial expression feature."
+          - "Visium mitochondrial probes, for example MT-ND1, have spatial distribution correlated with the invasive region."
+        genes:
+          spatially_associated_with_invasive_region: ["CDH2", "MT-ND1"]
+        region_labels:
+          contextual: ["Invasive"]
+        spatial_relation:
+          - "CDH2 and MT-ND1 spatial expression patterns overlap the invasive region in the Visium tissue section."
+      caution:
+        - "CDH2 and MT-ND1 are Visium-level spatial anchors, not standalone proof of invasive identity."
+        - "MT-ND1 is a mitochondrial probe spatial association, not a specific invasive tumor marker."
+
+    myoepithelial_absence:
+      claim: "Myoepithelial cell types are entirely absent from the invasive region, while myoepithelial marker genes require cell-label-aware interpretation."
+      evidence_types: ["cell_composition", "marker_gene", "discussion_interpretation"]
+      comparison: "Myoepithelial absence in invasive region"
+      evidence:
+        observations:
+          - "ACTA2+ and KRT15+ myoepithelial cell populations are distinct in DCIS#1 and DCIS#2 regions, but completely absent from the invasive tumor region."
+          - "The invasive region had a high incidence of invasive cell types, and the myoepithelial cell types were entirely absent."
+          - "Fig. 4d shows a six-gene myoepithelial marker panel: KRT23, ALDH1A3, SFRP1, KRT15, MYLK, and ACTA2."
+          - "Invasive-region interpretation should prioritize absence of mapped Myoepi_ACTA2+ and Myoepi_KRT15+ cell types over treating every myoepithelial-panel gene as absent."
+        genes:
+          myoepithelial_context: ["ACTA2", "KRT15", "KRT23", "ALDH1A3", "SFRP1", "MYLK"]
+        cell_types:
+          absent_from_invasive_region: ["Myoepi_ACTA2+", "Myoepi_KRT15+"]
+        region_labels:
+          contextual: ["Invasive"]
+      interpretation:
+        author_context: "ALDH1A3 is discussed through retinoic acid formation and basement-membrane adhesion literature."
+      caution:
+        - "Use absence for mapped myoepithelial cell types; marker expression may not be exactly zero at Visium spot resolution."
+        - "ACTA2, MYLK, SFRP1, and KRT15 can retain signal in the invasive-region marker panel, so interpret the myoepithelial evidence through mapped cell labels plus the full marker panel."
+        - "Treat the ALDH1A3-retinoic-acid interpretation as discussion-level support, not direct functional validation in this dataset."
+
+    endothelial_context:
+      claim: "Endothelial cells are found in slightly larger numbers within the invasive region."
+      evidence_types: ["cell_composition", "marker_gene"]
+      comparison: "Auxiliary endothelial context"
+      evidence:
+        observations:
+          - "Endothelial cells were found in slightly larger numbers within the invasive region."
+          - "Fig. 3b marks endothelial cells with VWF, and Fig. 4d shows endothelial marker context including LRRC15, AQP1, VWF, and PECAM1."
+        genes:
+          endothelial_marker_context: ["LRRC15", "AQP1", "VWF", "PECAM1"]
+        cell_types:
+          modestly_increased_in_invasive_region: ["Endothelial"]
+        region_labels:
+          contextual: ["Invasive"]
+      caution:
+        - "This is a modest auxiliary microenvironment feature, not a primary invasive identity marker."
+
+    dcis_marker_absence:
+      claim: "AGR3 and CEACAM6 support DCIS identity rather than invasive-region identity."
+      evidence_types: ["marker_gene"]
+      comparison: "DCIS-marker exclusion"
+      evidence:
+        observations:
+          - "AGR3 was identified as a tumor epithelial marker associated with DCIS regions, but not the invasive region."
+          - "CEACAM6 is shown as a DCIS marker in Fig. 3 and is stronger in DCIS regions than in the invasive region in Fig. 4d."
+        genes:
+          dcis_marker_context: ["AGR3", "CEACAM6"]
+          reduced_or_absent_from_invasive_region: ["AGR3", "CEACAM6"]
+        region_labels:
+          contextual: ["DCIS#1", "DCIS#2", "Invasive"]
+      caution:
+        - "High AGR3 or CEACAM6 suggests DCIS-associated identity or mixed context rather than pure invasive region identity."
+
+    macrophage_marker_context:
+      claim: "Macrophage markers are present in the invasive region, but MMP12 is absent."
+      evidence_types: ["marker_gene", "cell_composition"]
+      comparison: "Macrophage-marker context"
+      evidence:
+        observations:
+          - "The macrophage marker MMP12 was absent from the invasive region."
+          - "In Fig. 4d, the macrophage marker panel includes APOC1, C15orf48, ITGAX, and CD68 expression in the invasive region."
+        genes:
+          macrophage_context: ["APOC1", "C15orf48", "ITGAX", "CD68"]
+          absent_from_invasive_region: ["MMP12"]
+        region_labels:
+          contextual: ["Invasive"]
+      caution:
+        - "Do not interpret MMP12 absence as absence of macrophages from the invasive region."
+        - "MMP12 is a negative macrophage-marker anchor here, not an invasive tumor marker."
+
+  marker_index:
+    FASN:
+      role: "Invasive tumor marker used in the Xenium selected-gene panel"
+      evidence_blocks: ["invasive_marker_context"]
+      pattern: "Representative marker for invasive tumor cells in Fig. 3."
+
+    FOXA1:
+      role: "Tumor marker context in the invasive region"
+      evidence_blocks: ["invasive_marker_context"]
+      pattern: "Shown in the Fig. 4d tumor marker panel with expression in the invasive region."
+
+    GATA3:
+      role: "Tumor marker context in the invasive region"
+      evidence_blocks: ["invasive_marker_context"]
+      pattern: "Shown in the Fig. 4d tumor marker panel with expression in the invasive region."
+
+    TACSTD2:
+      role: "Tumor marker context in the invasive region"
+      evidence_blocks: ["invasive_marker_context"]
+      pattern: "Shown in the Fig. 4d tumor marker panel with expression in the invasive region."
+
+    ABCC11:
+      role: "Tumor marker context in the invasive region"
+      evidence_blocks: ["invasive_marker_context"]
+      pattern: "Shown in the Fig. 4d tumor marker panel with expression in the invasive region."
+
+    MKI67:
+      role: "Proliferation marker context in the invasive region"
+      evidence_blocks: ["invasive_marker_context"]
+      pattern: "Shown in the Fig. 4d tumor marker panel with expression in the invasive region."
+
+    CDH2:
+      role: "Visium invasive-associated spatial expression marker"
+      evidence_blocks: ["visium_invasive_spatial_markers"]
+      pattern: "Shown in Fig. 2c as CDH2 (Invasive), with spatial expression matching the invasive region."
+      caution: "Visium-level spatial anchor; interpret together with invasive cell labels and other markers."
+
+    MT-ND1:
+      role: "Visium mitochondrial probe spatially associated with invasive region"
+      evidence_blocks: ["visium_invasive_spatial_markers"]
+      pattern: "Spatial distribution correlates with the invasive region."
+      caution: "Visium-level spatial association, not a specific invasive tumor marker."
+
+    ACTA2:
+      role: "ACTA2+ myoepithelial population marker"
+      evidence_blocks: ["myoepithelial_absence"]
+      pattern: "Mapped ACTA2+ myoepithelial cells are absent from the invasive region; ACTA2 gene signal requires cell-label-aware interpretation."
+      caution: "Do not equate ACTA2 gene signal alone with myoepithelial-cell presence."
+
+    KRT15:
+      role: "KRT15+ myoepithelial marker and cell-label reference"
+      evidence_blocks: ["myoepithelial_absence"]
+      pattern: "Mapped KRT15+ myoepithelial cells are absent from the invasive region; KRT15 is part of the Fig. 4d myoepithelial marker panel."
+
+    KRT23:
+      role: "Myoepithelial marker panel gene"
+      evidence_blocks: ["myoepithelial_absence"]
+      pattern: "Part of the Fig. 4d myoepithelial marker panel; invasive-region interpretation is anchored by myoepithelial cell-type absence."
+
+    ALDH1A3:
+      role: "DCIS#1 myoepithelial marker with retinoic acid discussion context"
+      evidence_blocks: ["myoepithelial_absence"]
+      pattern: "Highly expressed in DCIS#1 myoepithelial cells and part of the myoepithelial marker context for interpreting invasive-region myoepithelial absence."
+      caution: "Retinoic-acid interpretation is discussion-level support, not direct functional validation in this dataset."
+
+    SFRP1:
+      role: "Myoepithelial marker panel gene"
+      evidence_blocks: ["myoepithelial_absence"]
+      pattern: "Part of the Fig. 4d myoepithelial marker panel; interpret together with mapped myoepithelial cell labels."
+
+    MYLK:
+      role: "Myoepithelial marker panel gene"
+      evidence_blocks: ["myoepithelial_absence"]
+      pattern: "Part of the Fig. 4d myoepithelial marker panel and later myoepithelial-boundary analyses; interpret together with mapped myoepithelial cell labels."
+
+    AGR3:
+      role: "DCIS-associated tumor epithelial marker absent from invasive region"
+      evidence_blocks: ["dcis_marker_absence"]
+      pattern: "Associated with DCIS regions, but not the invasive region."
+
+    CEACAM6:
+      role: "DCIS marker context reduced outside DCIS regions"
+      evidence_blocks: ["dcis_marker_absence"]
+      pattern: "Shown as a DCIS marker in Fig. 3 and stronger in DCIS regions than in the invasive region in Fig. 4d."
+
+    LRRC15:
+      role: "Endothelial marker context in the invasive region"
+      evidence_blocks: ["endothelial_context"]
+      pattern: "Shown in the Fig. 4d endothelial marker panel with expression in the invasive region."
+
+    AQP1:
+      role: "Endothelial marker context in the invasive region"
+      evidence_blocks: ["endothelial_context"]
+      pattern: "Shown in the Fig. 4d endothelial marker panel with expression in the invasive region."
+
+    VWF:
+      role: "Endothelial marker context in the invasive region"
+      evidence_blocks: ["endothelial_context"]
+      pattern: "Used as the endothelial marker in Fig. 3 and shown in the Fig. 4d endothelial marker panel."
+
+    PECAM1:
+      role: "Endothelial marker context in the invasive region"
+      evidence_blocks: ["endothelial_context"]
+      pattern: "Shown in the Fig. 4d endothelial marker panel with expression in the invasive region."
+
+    APOC1:
+      role: "Macrophage marker context in the invasive region"
+      evidence_blocks: ["macrophage_marker_context"]
+      pattern: "Shown in the Fig. 4d macrophage marker panel with expression in the invasive region."
+
+    C15orf48:
+      role: "Macrophage marker context in the invasive region"
+      evidence_blocks: ["macrophage_marker_context"]
+      pattern: "Shown in the Fig. 4d macrophage marker panel with expression in the invasive region."
+
+    ITGAX:
+      role: "Macrophage marker context in the invasive region"
+      evidence_blocks: ["macrophage_marker_context"]
+      pattern: "Shown in the Fig. 4d macrophage marker panel with expression in the invasive region."
+
+    CD68:
+      role: "Macrophage marker context in the invasive region"
+      evidence_blocks: ["macrophage_marker_context"]
+      pattern: "Shown in the Fig. 4d macrophage marker panel with expression in the invasive region."
+
+    MMP12:
+      role: "Macrophage marker absent from invasive region"
+      evidence_blocks: ["macrophage_marker_context"]
+      pattern: "Negative macrophage-marker anchor; absent from the invasive region despite other macrophage marker context."
+
+triple_positive_island:
+  narrative_question: >
+    The Janesick paper reported a very small ERBB2+/ESR1+/PGR+
+    triple-positive island in Sample #1.
+
+  evidence_blocks:
+    receptor_identity:
+      claim: "The triple-positive island co-expresses ERBB2, ESR1, and PGR."
+      evidence_types: ["marker_gene"]
+      comparison: "Local triple-positive island versus sample-level ER+/PR-/HER2+ annotation"
+      evidence:
+        observations:
+          - "Sample #1 was clinically annotated as ER+/PR-/HER2+."
+          - "Xenium identified a small local ERBB2+/ESR1+/PGR+ island."
+          - "In scFFPE-seq, rare PGR+ cells were detected, but they did not co-express ESR1 and ERBB2."
+        genes:
+          xenium_receptor_markers: ["ERBB2", "ESR1", "PGR"]
+        region_labels:
+          contextual: ["triple-positive island"]
+      caution:
+        - "The island spans only about 5-6 Visium spots, so do not treat it as a robust quantitative RSP anchor."
+
+    spatial_cellular_context:
+      claim: "The triple-positive island is near adipocytes, mainly DCIS#2 tumor epithelium, and lacks a KRT15+ myoepithelial layer."
+      evidence_types: ["spatial_relation", "cell_composition", "marker_gene"]
+      comparison: "Triple-positive island versus surrounding DCIS#2 and adipocyte-associated tissue context"
+      evidence:
+        observations:
+          - "The island is located in proximity to adipocytes."
+          - "The island is mainly composed of DCIS#2 tumor epithelial cells."
+          - "The island lacks a KRT15+ myoepithelial cell layer."
+        genes:
+          adipocyte_marker: ["FABP4"]
+          myoepithelial_marker: ["KRT15"]
+        cell_types:
+          contextual: ["DCIS_2", "Myoepi_KRT15+"]
+        region_labels:
+          contextual: ["DCIS#2", "triple-positive island"]
+      caution:
+        - "Adipocyte proximity should be assessed through Visium annotation or adipocyte marker context, not a Xenium adipocyte cell label."
+        - "The absence of a KRT15+ myoepithelial layer refers to the lack of a mapped cell-label barrier formed by KRT15+ myoepithelial cells, not an absolute zero expression requirement for the KRT15 gene."
+
+    molecular_pathway_context:
+      claim: "The original paper used Visium whole-transcriptome DGE and pathway enrichment to characterize the triple-positive island."
+      evidence_types: ["marker_gene", "differential_expression", "pathway"]
+      comparison: "Triple-positive island versus DCIS#1 and DCIS#2"
+      evidence:
+        observations:
+          - "Visium whole-transcriptome DGE identified 48 differentially expressed genes between the triple-positive island and DCIS#1 using log2FC > 1.5 and p-value < 0.05."
+          - "Visium whole-transcriptome DGE identified 44 differentially expressed genes between the triple-positive island and DCIS#2 using log2FC > 1.5 and p-value < 0.05."
+          - "Example genes shown include STC2, TRH, CACNG4, and RIMS4."
+          - "The paper reported ERBB4 and its ligand EREG in the triple-positive island context."
+          - "Enriched pathway terms were reported from the BioPlanet and Reactome databases."
+          - "As contrast-region context, DCIS#1 mainly showed metabolism-related terms."
+          - "As contrast-region context, DCIS#2 was positive for genes related to interferon signaling pathways."
+        genes:
+          visium_dge_genes: ["STC2", "TRH", "CACNG4", "RIMS4"]
+          visium_receptor_pathway_genes: ["ERBB4", "EREG"]
+        region_labels:
+          contextual: ["triple-positive island", "DCIS#1", "DCIS#2"]
+        differential_expression:
+          contrasts:
+            - comparison: "triple-positive island versus DCIS#1"
+              reference_receptor_status: "PGR-negative in the original paper"
+              n_genes: 48
+              log2fc_threshold: 1.5
+              p_value_threshold: 0.05
+            - comparison: "triple-positive island versus DCIS#2"
+              reference_receptor_status: "PGR-negative in the original paper"
+              n_genes: 44
+              log2fc_threshold: 1.5
+              p_value_threshold: 0.05
+        pathways:
+          pathway_databases: ["BioPlanet", "Reactome"]
+          triple_positive_island_terms:
+            - "ErbB4 signaling"
+            - "estrogen receptor signaling"
+            - "transmission across chemical synapses"
+          contrast_region_terms:
+            DCIS#1:
+              - "metabolism-related terms"
+            DCIS#2:
+              - "interferon signaling pathways"
+      caution:
+        - "Treat these genes and pathways as Visium whole-transcriptome support, not Xenium-panel validation."
+
+  marker_index:
+    ERBB2:
+      role: "HER2 receptor marker in the Xenium-defined triple-positive island"
+      evidence_blocks: ["receptor_identity"]
+      pattern: "Co-expressed locally with ESR1 and PGR."
+
+    ESR1:
+      role: "Estrogen receptor marker in the Xenium-defined triple-positive island"
+      evidence_blocks: ["receptor_identity"]
+      pattern: "Co-expressed locally with ERBB2 and PGR."
+
+    PGR:
+      role: "Progesterone receptor marker defining the local triple-positive island"
+      evidence_blocks: ["receptor_identity"]
+      pattern: "Detected locally with ERBB2 and ESR1 despite the sample-level PR-negative annotation."
+
+    FABP4:
+      role: "Adipocyte marker supporting adipocyte-proximity context"
+      evidence_blocks: ["spatial_cellular_context"]
+      pattern: "Used as adipocyte-associated marker context for the island's proximity to adipocytes."
+
+    KRT15:
+      role: "KRT15+ myoepithelial layer marker"
+      evidence_blocks: ["spatial_cellular_context"]
+      pattern: "The triple-positive island lacks a KRT15+ myoepithelial cell layer."
+
+    STC2:
+      role: "Visium whole-transcriptome DGE example gene"
+      evidence_blocks: ["molecular_pathway_context"]
+      pattern: "Reported among genes revealed by Visium whole-transcriptome analysis."
+
+    TRH:
+      role: "Visium whole-transcriptome DGE example gene"
+      evidence_blocks: ["molecular_pathway_context"]
+      pattern: "Reported among genes revealed by Visium whole-transcriptome analysis."
+
+    CACNG4:
+      role: "Visium whole-transcriptome DGE example gene"
+      evidence_blocks: ["molecular_pathway_context"]
+      pattern: "Reported among genes revealed by Visium whole-transcriptome analysis."
+
+    RIMS4:
+      role: "Visium whole-transcriptome DGE example gene"
+      evidence_blocks: ["molecular_pathway_context"]
+      pattern: "Reported among genes revealed by Visium whole-transcriptome analysis."
+
+    ERBB4:
+      role: "Visium receptor-pathway gene in the triple-positive island context"
+      evidence_blocks: ["molecular_pathway_context"]
+      pattern: "Reported with ErbB4 and estrogen receptor signaling context."
+      caution: "Visium whole-transcriptome support, not Xenium-panel validation."
+
+    EREG:
+      role: "ERBB4 ligand in the triple-positive island context"
+      evidence_blocks: ["molecular_pathway_context"]
+      pattern: "Reported with ERBB4/ErbB4 signaling context."
+      caution: "Visium whole-transcriptome support, not Xenium-panel validation."

@@ -1,0 +1,144 @@
+# Literature-defined biological inputs for the R5 single-cell-to-spatial map.
+# Analysis parameters, object-selection rules and claim boundaries belong in
+# plan.md and the analysis code rather than in this anchor file.
+
+schema_version: "3.0"
+
+source:
+  study_id: "wu2021_breast_atlas"
+  citation: >-
+    Wu SZ, et al. A single-cell and spatially resolved atlas of human breast
+    cancers. Nature Genetics. 2021;53:1334-1347.
+  doi: "10.1038/s41588-021-00911-1"
+  accession: "GSE176078"
+
+case:
+  sample_id: "CID44971"
+  disease_subtype: "triple-negative breast cancer"
+  spatial_platform: "10x Genomics Visium"
+
+hypothesis:
+  name: "iCAF-associated regional program at a T-cell-rich tissue interface"
+  source_statement: >-
+    Wu et al. defined CAF s1/s2 as MSC/iCAF-like states and CAF s4/s5 as
+    myofibroblast-like states. Spatial deconvolution placed myofibroblast-like
+    CAFs preferentially in invasive cancer regions, whereas iCAFs extended
+    across invasive cancer, stromal and TIL-aggregate regions. Across the
+    spatial cohort, iCAFs positively colocalized with several lymphocyte
+    populations, including CD4 and CD8 T cells, and jointly enriched CAF-T
+    locations carried selected immunoregulatory ligand-receptor signals.
+  source_evidence:
+    caf_state_definition: >-
+      Single-cell pseudotemporal analysis identified MSC/iCAF-like CAF s1/s2
+      and myofibroblast-like CAF s4/s5 states.
+    spatial_partitioning: >-
+      Across the six locally profiled spatial cases, myofibroblast-like CAFs
+      were enriched in invasive cancer regions, whereas iCAFs were distributed
+      across invasive cancer, stroma and TIL-aggregate regions. CID44971 was
+      shown as a representative TNBC spatial map in Fig. 7b-e.
+    lymphocyte_colocalization: >-
+      Pearson correlations across 13 spatial cases linked iCAF abundance with
+      memory/naive B-cell and CD4/CD8 T-cell abundance in multiple tumors.
+    candidate_molecular_context: >-
+      Wu et al. evaluated selected CAF-ligand and T-cell-receptor pairs in the
+      top 10% of spots jointly enriched for iCAFs and CD4/CD8 T cells.
+  regal_translation: >-
+    In CID44971, determine which pre-learned regional programs receive the
+    single-cell-defined iCAF and T-cell states, how those programs complete the
+    corresponding tissue environments, and whether their spatial interface
+    localizes the reported CAF-T candidate molecular background.
+
+state_queries:
+  broad_caf:
+    role: "lineage background for the iCAF carrier query"
+    target:
+      column: "celltype_major"
+      labels: ["CAFs"]
+    reference:
+      column: "celltype_major"
+      labels: ["PVL", "Endothelial"]
+
+  icaf:
+    role: "primary carrier-state query"
+    target:
+      column: "celltype_subset"
+      labels:
+        - "CAFs MSC iCAF-like s1"
+        - "CAFs MSC iCAF-like s2"
+    reference:
+      column: "celltype_subset"
+      labels:
+        - "CAFs myCAF like s4"
+        - "CAFs myCAF like s5"
+
+  mycaf:
+    role: "reciprocal CAF-state specificity query"
+    target:
+      column: "celltype_subset"
+      labels:
+        - "CAFs myCAF like s4"
+        - "CAFs myCAF like s5"
+    reference:
+      column: "celltype_subset"
+      labels:
+        - "CAFs MSC iCAF-like s1"
+        - "CAFs MSC iCAF-like s2"
+
+  t_cell:
+    role: "CD4/CD8 T-cell context query"
+    target:
+      column: "celltype_minor"
+      labels: ["T cells CD4+", "T cells CD8+"]
+    reference:
+      column: "celltype_major"
+      labels: ["B-cells", "Myeloid", "Plasmablasts"]
+
+spatial_mapping:
+  carrier_query: "icaf"
+  specificity_queries: ["broad_caf", "mycaf"]
+  context_query: "t_cell"
+  regional_relation: "intersection of the carrier and immune-context programs"
+
+  pathology_context:
+    column: "Classification"
+    classes:
+      - "Invasive cancer + lymphocytes"
+      - "DCIS"
+      - "Stroma"
+      - "Lymphocytes"
+
+  cell_abundance_readouts:
+    primary:
+      - "T cells CD4+"
+      - "T cells CD8+"
+    auxiliary:
+      - "CAFs MSC iCAF-like"
+      - "CAFs myCAF-like"
+
+candidate_ligand_receptor_pairs:
+  source: "Wu et al. Fig. 7f candidate CAF-T spatial signaling panel"
+  pairs:
+    - ligand: "VTCN1"
+      receptor: "BTLA"
+    - ligand: "TNFSF14"
+      receptor: "LTBR"
+    - ligand: "CXCL9"
+      receptor: "CXCR3"
+    - ligand: "CXCL10"
+      receptor: "CXCR3"
+    - ligand: "LTB"
+      receptor: "LTBR"
+    - ligand: "CXCL12"
+      receptor: "CXCR4"
+    - ligand: "CXCL14"
+      receptor: "CXCR4"
+    - ligand: "TGFB1"
+      receptor: "TGFBR2"
+    - ligand: "TGFB3"
+      receptor: "TGFBR2"
+    - ligand: "CFH"
+      receptor: "SELL"
+    - ligand: "C3"
+      receptor: "C3AR1"
+    - ligand: "C3"
+      receptor: "CD81"

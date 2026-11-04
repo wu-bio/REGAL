@@ -1,7 +1,7 @@
 """Validate the saved resolution series and visualize all latent/observed activity maps.
 
 Read-only with respect to simulation inputs. No simulation or REGAL fit is run.
-Diagnostic PNGs and their source tables are written to simulation/outputs/resolution/simulation_check by default.
+Diagnostic PNGs and their source tables are written to Simulation/outputs/resolution/simulation_check by default.
 """
 from __future__ import annotations
 
@@ -22,8 +22,8 @@ from scipy import sparse
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-from utils.dataset_registry import DatasetSpec  # noqa: E402
-from utils.h5ad_schema import check_rss_h5ad_schema  # noqa: E402
+from Utils.dataset_registry import DatasetSpec  # noqa: E402
+from Utils.h5ad_schema import check_rss_h5ad_schema  # noqa: E402
 
 if __package__:
     from .generate_region_layout import ACTIVITY_COLORS

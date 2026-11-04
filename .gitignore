@@ -24,14 +24,16 @@ htmlcov/
 # Generated analysis artifacts stay outside Git unless explicitly curated.
 /AGENTS.md
 /docs/
-/studies/
+/Studies/
 /tests/
 /outputs/
 **/outputs/
-studies/*/outputs/
-studies/*/resources/
+Studies/*/outputs/
+Studies/*/resources/
 
 # Logs and temporary files
 *.log
 *.tmp
 *.temp
+
+/Plotting/output/

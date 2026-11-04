@@ -19,7 +19,7 @@ import pandas as pd
 from scipy.optimize import linear_sum_assignment
 from scipy.stats import spearmanr
 
-from studies.R1_regional_activity.scripts.program_metrics import (
+from Studies.R1_regional_activity.scripts.program_metrics import (
     component_metrics,
     expression_lookup,
     module_diversity,

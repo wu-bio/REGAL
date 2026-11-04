@@ -1,0 +1,94 @@
+roots:
+  data: ${HOME}/data
+  breast_st: ${data}/BREAST/ST
+  breast_sample: ${breast_st}/Breast_BlockA_Section1
+  brain_st: ${data}/BRAIN/ST
+  liver_st: ${data}/LIVER/ST
+  mob_st: ${data}/MOB/ST
+  janesick_st: ${data}/Janesick/ST
+  wu: ${data}/Wu
+fig03:
+  paths:
+    h5ad: ${breast_st}/Breast_BlockA_Section1.h5ad
+    nmf: ${breast_sample}/NMF/K20
+    nnmf: ${breast_sample}/NNMF/K24
+    regal: ${breast_sample}/rsp_out
+    regal_rss_ablation: ${breast_sample}/REGAL-RSS/comparison
+    sparkx: ${breast_sample}/SPARKX/sparkx_results.csv
+    stagate: ${breast_sample}/STAGATE/stagate.h5ad
+    stamp: ${breast_sample}/STAMP/K20
+fig04:
+  paths:
+    brain_h5ad: ${brain_st}/MouseBrain_Xenium.h5ad
+    brain_sample_dir: ${brain_st}/revision_reference_association/no_adaptive/MouseBrain_Xenium
+    liver_h5ad: ${liver_st}/AM042.h5ad
+    liver_sample_dir: ${liver_st}/AM042
+    puck_h5ad: ${mob_st}/Puck_200127_15.h5ad
+    puck_sample_dir: ${mob_st}/Puck_200127_15
+    stereo_h5ad: ${mob_st}/Stereo_seq.h5ad
+    stereo_sample_dir: ${mob_st}/Stereo_seq
+  options:
+    liver_label_column: Cell_Type
+    liver_proxy_scores:
+      Hep_1: -1.0
+      Hep_2: 0.0
+      Hep_3: 1.0
+    liver_sample_id: AM042
+    mob_evidence_thresholds:
+      spearman: 0.3
+      log2fc: 0.5
+fig05:
+  paths:
+    h5ad: ${breast_sample}/rctd-out/st_with_rctd_copykat.h5ad
+    sample_dir: ${breast_st}/Breast_BlockA_Section1
+fig06:
+  paths:
+    h5ad: ${janesick_st}/janesick_visium_sample1.h5ad
+    sample_dir: ${janesick_st}/Janesick_Visium_Sample1
+    xenium_mapping: ${janesick_st}/registration/xenium_cells_to_visium_spots_author_companion.csv.gz
+  options:
+    sample_id: Janesick_Visium_Sample1
+    analysis_parameters:
+      dcis2_primary_fraction: 0.25
+      local_ring_max_order: 2
+      dcis1_xenium_eps_um: 22.0
+      dcis1_xenium_min_samples: 5
+      dcis1_xenium_min_cells: 20
+      dcis1_contact_radius_multiplier: 3.0
+      dcis2_xenium_eps_um: 27.5
+      dcis2_xenium_min_samples: 5
+      dcis2_xenium_min_cells: 5
+      dcis2_small_microstructure_max_cells: 20
+      dcis2_rsd_overlap_fraction: 0.5
+      dcis2_contact_radius_multiplier: 3.0
+      invasive_cell_neighborhood_radius_um: 27.5
+fig07:
+  paths:
+    h5ad: ${janesick_st}/janesick_visium_sample1.h5ad
+    sample_dir: ${janesick_st}/Janesick_Visium_Sample1
+    xenium_mapping: ${janesick_st}/registration/xenium_cells_to_visium_spots_author_companion.csv.gz
+  options:
+    sample_id: Janesick_Visium_Sample1
+    analysis_parameters:
+      dcis2_primary_fraction: 0.25
+      local_ring_max_order: 2
+      dcis1_xenium_eps_um: 22.0
+      dcis1_xenium_min_samples: 5
+      dcis1_xenium_min_cells: 20
+      dcis1_contact_radius_multiplier: 3.0
+      dcis2_xenium_eps_um: 27.5
+      dcis2_xenium_min_samples: 5
+      dcis2_xenium_min_cells: 5
+      dcis2_small_microstructure_max_cells: 20
+      dcis2_rsd_overlap_fraction: 0.5
+      dcis2_contact_radius_multiplier: 3.0
+      invasive_cell_neighborhood_radius_um: 27.5
+fig08:
+  paths:
+    h5ad: ${wu}/ST/Wu_Breast_CID44971.h5ad
+    sample_dir: ${wu}/ST/Wu_Breast_CID44971
+    stereoscope: ${wu}/ST/Wu_Breast_CID44971/stereoscope-out/results/wu2021_author_minor/celltype_minor_author/stereoscope_proportions.parquet
+    sc_h5ad: ${wu}/SC/wu_tnbc_reference.h5ad
+  options:
+    sample_id: CID44971
+    excluded_patient: CID44971

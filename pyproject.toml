@@ -31,7 +31,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["RSS", "RSP", "RSMD", "utils"]
+packages = ["RSS", "RSP", "RSMD", "Utils"]
 
 [tool.ruff]
 line-length = 120

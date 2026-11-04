@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from utils.dataset_registry import get_dataset
-from utils.spatial_plotting import (
+from Utils.dataset_registry import get_dataset
+from Utils.spatial_plotting import (
     ensure_out_dir,
     load_spatial_coords,
     ranked_grid,
@@ -239,7 +239,7 @@ def visualize_sample(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Visualize Regional Specificity Score (RSS) objects.")
-    parser.add_argument("--dataset", default="WU", help="Dataset id from utils.dataset_registry.")
+    parser.add_argument("--dataset", default="WU", help="Dataset id from Utils.dataset_registry.")
     parser.add_argument("--sample", default=None, help="Single sample id. Defaults to all samples in dataset.")
     parser.add_argument("--sample-dir", default=None, help="Explicit sample directory.")
     parser.add_argument("--out-dir", default=None, help="Explicit output directory.")

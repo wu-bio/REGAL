@@ -17,8 +17,8 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import cKDTree
 
-from utils.dataset_registry import get_dataset
-from utils.spatial_plotting import (
+from Utils.dataset_registry import get_dataset
+from Utils.spatial_plotting import (
     ensure_out_dir,
     load_spatial_coords,
     sample_dir_to_h5ad_path,
@@ -536,7 +536,7 @@ def visualize_sample(sample_dir: Path, out_dir: Path | None = None, max_rsps: in
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Visualize Regional Specificity Program (RSP) objects.")
-    parser.add_argument("--dataset", default="WU", help="Dataset id from utils.dataset_registry.")
+    parser.add_argument("--dataset", default="WU", help="Dataset id from Utils.dataset_registry.")
     parser.add_argument("--sample", default=None, help="Single sample id. Defaults to all samples in dataset.")
     parser.add_argument("--sample-dir", default=None, help="Explicit sample directory.")
     parser.add_argument("--out-dir", default=None, help="Explicit output directory.")

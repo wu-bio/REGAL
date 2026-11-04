@@ -18,8 +18,8 @@ from scipy.spatial import cKDTree
 from scipy.stats import rankdata
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from utils.dataset_registry import DatasetSpec
-from utils.h5ad_schema import check_rss_h5ad_schema
+from Utils.dataset_registry import DatasetSpec
+from Utils.h5ad_schema import check_rss_h5ad_schema
 
 if __package__:
     from .generate_simulation import gene_counts, input_h5ad_path, sha256, write_json, membership_groups
